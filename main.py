@@ -13,14 +13,16 @@ class SnakeTile:
         pygame.draw.rect(surface, self.color, pygame.Rect(self.pos.x, self.pos.y, self.size, self.size))
 
     def move(self, dir, dt):
+        # print(f"self.pos = {self.pos} (Before Move)")
         if dir == "UP":
-            self.pos.y -= self.size*3 * dt
+            self.pos.y -= self.size *dt
         elif dir == "DOWN":
-            self.pos.y += self.size*3 * dt
+            self.pos.y += self.size *dt
         elif dir == "LEFT":
-            self.pos.x -= self.size*3 * dt
+            self.pos.x -= self.size *dt
         elif dir == "RIGHT":
-            self.pos.x += self.size*3 * dt
+            self.pos.x += self.size *dt
+        # print(f"self.pos = {self.pos} (After Move)")
 
     def getPos(self):
         return self.pos
@@ -43,15 +45,11 @@ class Snake:
             tile.draw(self.surface)
 
     def move(self, dir, dt):
-        pos = self.snakeList[0].getPos()
+        pos = self.snakeList[0].pos.copy()
         self.snakeList[0].move(dir, dt)
         for tile in self.snakeList[1:]:
-            print(pos)
-            print(self.snakeList[0].getPos())
             p = tile.getPos()
-            print(p)
-            tile.setPos(pos)
-            print(tile.getPos())
+            tile.setPos(tile.getPos().move_towards(pos, self.size * dt))
             pos = p
 
     def addTile(self):
@@ -74,6 +72,10 @@ def main():
     snake = Snake(screen)
 
     while running:
+
+        # limits FPS to 60
+        dt = clock.tick(60) / 100
+
         # poll for events
         # pygame.QUIT event means the user clicked X to close your window
         for event in pygame.event.get():
@@ -90,8 +92,8 @@ def main():
                     dir = "LEFT"
                 if event.key == pygame.K_d:
                     dir = "RIGHT"
-                    for tile in snake.getSnakeList():
-                        print(tile.getPos())
+
+
         # fill the screen with a color to wipe away anything from last frame
         screen.fill("black")
 
@@ -101,10 +103,6 @@ def main():
         # flip() the display to put your work on screen
         pygame.display.flip()
 
-        # limits FPS to 60
-        # dt is delta time in seconds since last frame, used for framerate-
-        # independent physics.
-        dt = clock.tick(60) / 1000
 
     pygame.quit()
 
