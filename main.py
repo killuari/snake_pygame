@@ -14,22 +14,51 @@ class SnakeTile:
 
     def move(self, dir, dt):
         if dir == "UP":
-            self.pos.y -= 5 * dt
+            self.pos.y -= self.size*3 * dt
         elif dir == "DOWN":
-            self.pos.y += 5 * dt
+            self.pos.y += self.size*3 * dt
         elif dir == "LEFT":
-            self.pos.x -= 5 * dt
+            self.pos.x -= self.size*3 * dt
         elif dir == "RIGHT":
-            self.pos.x += 5 * dt
+            self.pos.x += self.size*3 * dt
+
+    def getPos(self):
+        return self.pos
+    
+    def setPos(self, pos):
+        self.pos = pos
 
 class Snake:
     snakeList = []
+    surface = 0
+    size = 0
 
     def __init__(self, surface) -> None:
         self.snakeList.append(SnakeTile(pygame.Vector2(surface.get_width() / 2, surface.get_height() / 2)))
+        self.surface = surface
+        self.size = self.snakeList[-1].size
 
-    def draw():
-        pass
+    def draw(self):
+        for tile in self.getSnakeList():
+            tile.draw(self.surface)
+
+    def move(self, dir, dt):
+        pos = self.snakeList[0].getPos()
+        self.snakeList[0].move(dir, dt)
+        for tile in self.snakeList[1:]:
+            print(pos)
+            print(self.snakeList[0].getPos())
+            p = tile.getPos()
+            print(p)
+            tile.setPos(pos)
+            print(tile.getPos())
+            pos = p
+
+    def addTile(self):
+        self.snakeList.append(SnakeTile(pygame.Vector2(self.surface.get_width() / 2, self.surface.get_height() / 2)))
+
+    def getSnakeList(self):
+        return self.snakeList
 
 
 def main():
@@ -41,7 +70,8 @@ def main():
     dt = 0
 
     dir = "UP"
-    player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
+
+    snake = Snake(screen)
 
     while running:
         # poll for events
@@ -49,20 +79,24 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_q:
+                    snake.addTile()
+                if event.key == pygame.K_w:
+                    dir = "UP"
+                if event.key == pygame.K_s:
+                    dir = "DOWN"
+                if event.key == pygame.K_a:
+                    dir = "LEFT"
+                if event.key == pygame.K_d:
+                    dir = "RIGHT"
+                    for tile in snake.getSnakeList():
+                        print(tile.getPos())
         # fill the screen with a color to wipe away anything from last frame
         screen.fill("black")
 
-        pygame.draw.rect(screen, "red", pygame.Rect(player_pos.x, player_pos.y, 35, 35))
-
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_w]:
-            player_pos.y -= 300 * dt
-        if keys[pygame.K_s]:
-            player_pos.y += 300 * dt
-        if keys[pygame.K_a]:
-            player_pos.x -= 300 * dt
-        if keys[pygame.K_d]:
-            player_pos.x += 300 * dt
+        snake.move(dir, dt)
+        snake.draw()
 
         # flip() the display to put your work on screen
         pygame.display.flip()
